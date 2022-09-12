@@ -1,6 +1,10 @@
 #pragma once
 
 #include "D3DProxy.h"
+#include "Model.h"
+#include "Camera.h"
+//#include "ColorShader.h"
+#include "TextureShader.h"
 
 const bool FULL_SCREEN = true;
 const bool VSYNC_ENABLED = true;
@@ -18,6 +22,11 @@ public:
 	bool Frame();
 
 private:
-	bool Render();
 	D3DProxy* pDirect3D;
+	Camera* pCamera;
+	Model* pModel;
+	//ColorShader* pColorShader;
+	TextureShader* pTextureShader;
+
+	bool Render();
 };

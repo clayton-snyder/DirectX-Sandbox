@@ -21,7 +21,6 @@ System::~System() {
 // Create and initialize windows, input, and graphics objects
 bool System::Init() {
 	int screenWidth = 0, screenHeight = 0;
-	bool result;
 
 	InitializeWindows(screenWidth, screenHeight);
 
@@ -34,14 +33,15 @@ bool System::Init() {
 
 	pInput->Init();
 
+
 	this->pGraphics = new Graphics();
-	if (!(this->pGraphics))
+	if (!this->pGraphics)
 	{
 		printf("ERROR! Failed to create Graphics.\n");
 		return false;
 	}
-
-	result = this->pGraphics->Init(screenWidth, screenHeight, this->hWnd);
+	
+	bool result = this->pGraphics->Init(screenWidth, screenHeight, this->hWnd);
 	return result;
 }
 
@@ -66,13 +66,12 @@ void System::Shutdown() {
 
 void System::Run() {
 	MSG msg;
-	bool quit = false, result;
+	bool quit = false;
 
 	ZeroMemory(&msg, sizeof(MSG));
 
 	// Loop until there is a quit message from the window or the user.
-	while (!quit)
-	{
+	while (!quit) {
 		// Check for system messages
 		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 		{
@@ -91,8 +90,7 @@ void System::Run() {
 }
 
 bool System::Frame() {
-	if (this->pInput->IsKeyDown(VK_ESCAPE))
-	{
+	if (this->pInput->IsKeyDown(VK_ESCAPE)) {
 		return true;
 	}
 
