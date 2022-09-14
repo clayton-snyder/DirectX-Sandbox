@@ -5,7 +5,9 @@ Graphics::Graphics() {
 	this->pCamera = nullptr;
 	this->pModel = nullptr;
 	//this->pColorShader = nullptr;
-	this->pTextureShader = nullptr;
+	//this->pTextureShader = nullptr;
+	this->pLightShader = nullptr;
+	this->pLight = nullptr;
 }
 
 Graphics::Graphics(const Graphics& other) {
@@ -37,72 +39,82 @@ bool Graphics::Init(int screenW, int screenH, HWND hWnd) {
 		return false;
 	}
 
-	//this->pColorShader = new ColorShader();
-	//result = this->pColorShader->Init(this->pDirect3D->GetDevice(), hWnd);
-	this->pTextureShader = new TextureShader();
-	result = this->pTextureShader->Init(this->pDirect3D->GetDevice(), hWnd);
+	this->pLightShader = new LightShader();
+	result = pLightShader->Init(pDirect3D->GetDevice(), hWnd);
 	if (!result) {
 		MessageBox(hWnd, L"Could not initialize the TextureShader object.", L"TextureShader Init Error", MB_OK);
 		return false;
 	}
 
+	this->pLight = new Light();
+	pLight->SetDiffuseColor(1.0f, 0.0f, 1.0f, 1.0f);
+	pLight->SetDirection(0.0f, 0.0f, 1.0f);
+
 	return true;
 }
 
 void Graphics::Shutdown() {
-	if (this->pTextureShader) {
-		this->pTextureShader->Shutdown();
-		delete this->pTextureShader;
-		this->pTextureShader = nullptr;
+	if (this->pLightShader) {
+		pLightShader->Shutdown();
+		delete pLightShader;
+		pLightShader = nullptr;
+	}
+
+	if (this->pLight) {
+		delete pLight;
+		pLight = nullptr;
 	}
 
 	if (this->pModel) {
-		this->pModel->Shutdown();
-		delete this->pModel;
-		this->pModel = nullptr;
+		pModel->Shutdown();
+		delete pModel;
+		pModel = nullptr;
 	}
 
 	if (this->pCamera) {
-		delete this->pCamera;
-		this->pCamera = nullptr;
+		delete pCamera;
+		pCamera = nullptr;
 	}
 
-	if (this->pDirect3D)
-	{
-		this->pDirect3D->Shutdown();
-		delete this->pDirect3D;
-		this->pDirect3D = nullptr;
+	if (this->pDirect3D) {
+		pDirect3D->Shutdown();
+		delete pDirect3D;
+		pDirect3D = nullptr;
 	}
 }
 
 // Returning 'true' will exit the program
 bool Graphics::Frame() {
-	return Render();
+	static float rotation = 0.0f; // is this the right place to declare this?
+
+	rotation += DirectX::XM_PI * 0.01f;
+	if (rotation > 360.0f) rotation = 0;
+
+	return Render(rotation);
 }
 
-bool Graphics::Render() {
-	this->pDirect3D->BeginScene(0.0f, 0.0f, 0.0f, 1.0f); // plain black screen
+bool Graphics::Render(float rotation) {
+	pDirect3D->BeginScene(1.0f, 1.0f, 0.85f, 1.0f); // plain white screen
 
 	// Generate the view matrix based on camera's current position
-	this->pCamera->Render();
+	pCamera->Render();
 
 	DirectX::XMMATRIX worldMatrix, viewMatrix, projectionMatrix; // populated by passing as refs
-	this->pDirect3D->GetWorldMatrix(worldMatrix);
-	this->pCamera->GetViewMatrix(viewMatrix);
-	this->pDirect3D->GetProjectionMatrix(projectionMatrix);
+	pDirect3D->GetWorldMatrix(worldMatrix);
+	pCamera->GetViewMatrix(viewMatrix);
+	pDirect3D->GetProjectionMatrix(projectionMatrix);
 
 	// Put the vertex/index buffers in the graphics pipeline to prepare for rendering
-	this->pModel->Render(this->pDirect3D->GetDeviceContext()); 
+	pModel->Render(this->pDirect3D->GetDeviceContext()); 
 
-	bool result = this->pTextureShader->Render(
-		this->pDirect3D->GetDeviceContext(),
-		this->pModel->GetIndexCount(),
-		this->pModel->GetTexture(),
-		worldMatrix, viewMatrix, projectionMatrix
+	bool result = this->pLightShader->Render(
+		pDirect3D->GetDeviceContext(), pModel->GetIndexCount(), pModel->GetTexture(),
+		worldMatrix * DirectX::XMMatrixRotationY(rotation), viewMatrix, projectionMatrix,
+		pLight->GetDirection(), pLight->GetDiffuseColor()
 	);
 	if (!result) return false;
 
-	this->pDirect3D->EndScene();
+	pDirect3D->EndScene();
 
 	return false;
 }

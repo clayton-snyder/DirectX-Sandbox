@@ -257,7 +257,7 @@ bool D3DProxy::Init(int screenW, int screenH, bool vsync, HWND hWnd, bool fullsc
 	// Set up custom rasterizer state so we can override control of how polygons are rendered
 	// There is a default rasterizer state but we need this if we want to have any custom control
 	rasterDesc.AntialiasedLineEnable = false;
-	rasterDesc.CullMode = D3D11_CULL_BACK;
+	rasterDesc.CullMode = D3D11_CULL_NONE;
 	rasterDesc.DepthBias = 0;
 	rasterDesc.DepthBiasClamp = 0.0f;
 	rasterDesc.DepthClipEnable = true;

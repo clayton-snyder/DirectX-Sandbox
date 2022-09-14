@@ -56,15 +56,19 @@ bool Model::InitBuffers(ID3D11Device* device) {
 	// interpolation will be done by looking at the texture rather than lerping a color.
 	vertices[0].position = DirectX::XMFLOAT3(-1.0f, -1.0f, 0.0f);  // bot left
 	vertices[0].texture = DirectX::XMFLOAT2(0.0f, 1.0f);
+	vertices[0].normal = DirectX::XMFLOAT3(0.0f, 0.0f, -1.0f);
 
 	vertices[1].position = DirectX::XMFLOAT3(-1.0f, 1.0f, 0.0f);  // top left
 	vertices[1].texture = DirectX::XMFLOAT2(0.0f, 0.0f);
+	vertices[1].normal = DirectX::XMFLOAT3(0.0f, 0.0f, -1.0f);
 
 	vertices[2].position = DirectX::XMFLOAT3(1.0f, 1.0f, 0.0f);  // top right
 	vertices[2].texture = DirectX::XMFLOAT2(1.0f, 0.0f);
+	vertices[2].normal = DirectX::XMFLOAT3(0.0f, 0.0f, -1.0f);
 
 	vertices[3].position = DirectX::XMFLOAT3(1.0f, -1.0f, 0.0f); // bot right
 	vertices[3].texture = DirectX::XMFLOAT2(1.0f, 1.0f);
+	vertices[3].normal = DirectX::XMFLOAT3(0.0f, 0.0f, -1.0f);
 
 
 	// Load the index array with data.

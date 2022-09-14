@@ -4,7 +4,9 @@
 #include "Model.h"
 #include "Camera.h"
 //#include "ColorShader.h"
-#include "TextureShader.h"
+//#include "TextureShader.h"
+#include "LightShader.h"
+#include "Light.h"
 
 const bool FULL_SCREEN = true;
 const bool VSYNC_ENABLED = true;
@@ -26,7 +28,9 @@ private:
 	Camera* pCamera;
 	Model* pModel;
 	//ColorShader* pColorShader;
-	TextureShader* pTextureShader;
+	//TextureShader* pTextureShader;
+	LightShader* pLightShader;
+	Light* pLight;
 
-	bool Render();
+	bool Render(float);
 };

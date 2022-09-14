@@ -9,8 +9,9 @@
 class Model {
 private:
 	struct Vertex {
-		DirectX::XMFLOAT3 position; // x,y,z
+		DirectX::XMFLOAT3 position;
 		DirectX::XMFLOAT2 texture;
+		DirectX::XMFLOAT3 normal;
 	};
 
 	ID3D11Buffer* pVertexBuffer;
