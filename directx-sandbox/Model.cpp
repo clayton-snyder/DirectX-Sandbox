@@ -5,12 +5,8 @@ Model::Model() {
 	this->pVertexBuffer = nullptr;
 	this->pIndexBuffer = nullptr;
 	this->pTexture = nullptr;
-}
-
-Model::Model(const Model& other) {
-}
-
-Model::~Model() {
+	this->vertexCount = 0;
+	this->indexCount = 0;
 }
 
 bool Model::Init(ID3D11Device* pDevice, ID3D11DeviceContext* pDeviceContext, const char* textureFilename) {
@@ -47,8 +43,8 @@ ID3D11ShaderResourceView* Model::GetTexture() {
 // This is where the vertex and index buffers are created. Typically you would read in a model 
 // data file and create the buffers from that, but for now we are just making one triangle.
 bool Model::InitBuffers(ID3D11Device* device) {
-	this->vertexCount = 3;
-	this->indexCount = 3;
+	this->vertexCount = 4;
+	this->indexCount = 6;
 	Vertex* vertices = new Vertex[this->vertexCount];
 	unsigned long* indices = new unsigned long[this->indexCount];
 
@@ -59,22 +55,25 @@ bool Model::InitBuffers(ID3D11Device* device) {
 	// here we are mapping a texture coordinate to a polygon vertex. Kind of like an anchor and
 	// interpolation will be done by looking at the texture rather than lerping a color.
 	vertices[0].position = DirectX::XMFLOAT3(-1.0f, -1.0f, 0.0f);  // bot left
-	//vertices[0].color = DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 0.1f);
 	vertices[0].texture = DirectX::XMFLOAT2(0.0f, 1.0f);
 
-	vertices[1].position = DirectX::XMFLOAT3(0.0f, 1.0f, 0.0f);  // top middle
-	//vertices[1].color = DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 0.1f);
-	vertices[1].texture = DirectX::XMFLOAT2(0.5f, 0.0f);
+	vertices[1].position = DirectX::XMFLOAT3(-1.0f, 1.0f, 0.0f);  // top left
+	vertices[1].texture = DirectX::XMFLOAT2(0.0f, 0.0f);
 
-	vertices[2].position = DirectX::XMFLOAT3(1.0f, -1.0f, 0.0f);  // bot right
-	//vertices[2].color = DirectX::XMFLOAT4(0.0f, 0.0f, 1.0f, 0.0f);
-	vertices[2].texture = DirectX::XMFLOAT2(1.0f, 1.0f);
+	vertices[2].position = DirectX::XMFLOAT3(1.0f, 1.0f, 0.0f);  // top right
+	vertices[2].texture = DirectX::XMFLOAT2(1.0f, 0.0f);
+
+	vertices[3].position = DirectX::XMFLOAT3(1.0f, -1.0f, 0.0f); // bot right
+	vertices[3].texture = DirectX::XMFLOAT2(1.0f, 1.0f);
 
 
 	// Load the index array with data.
-	indices[0] = 0;  // bot left
-	indices[1] = 1;  // top left
-	indices[2] = 2;  // top right
+	indices[0] = 0;  // t1 bot left
+	indices[1] = 1;  // t1 top left
+	indices[2] = 3;  // t1 bot right
+	indices[3] = 3;  // t2 bot right
+	indices[4] = 1;  // t2 top left
+	indices[5] = 2;  // t2 top right
 
 
 	D3D11_BUFFER_DESC vertexBufferDesc;

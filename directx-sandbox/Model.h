@@ -27,8 +27,6 @@ private:
 
 public:
 	Model();
-	Model(const Model&);
-	~Model();
 
 	// These functions handle init and shutdown of the model's vertex and index buffers.
 	bool Init(ID3D11Device*, ID3D11DeviceContext*, const char*);

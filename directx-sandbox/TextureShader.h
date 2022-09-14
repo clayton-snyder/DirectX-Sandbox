@@ -30,11 +30,8 @@ private:
 
 public:
 	TextureShader();
-	TextureShader(const TextureShader&);
-	~TextureShader();
 
 	bool Init(ID3D11Device*, HWND);
 	void Shutdown();
 	bool Render(ID3D11DeviceContext*, int, ID3D11ShaderResourceView*, DirectX::XMMATRIX, DirectX::XMMATRIX, DirectX::XMMATRIX);
-
 };

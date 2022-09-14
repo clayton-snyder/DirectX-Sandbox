@@ -8,12 +8,6 @@ TextureShader::TextureShader() {
 	this->pSamplerState = nullptr;
 }
 
-TextureShader::TextureShader(const TextureShader& other) {
-}
-
-TextureShader::~TextureShader() {
-}
-
 bool TextureShader::Init(ID3D11Device* pDevice, HWND hWnd) {
 	return this->InitShader(pDevice, hWnd, L"./TextureVs.hlsl", L"./TexturePs.hlsl");
 }

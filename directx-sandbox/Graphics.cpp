@@ -31,7 +31,7 @@ bool Graphics::Init(int screenW, int screenH, HWND hWnd) {
 	this->pCamera->SetRotation(0.0f, 0.0f, 0.0f);
 
 	this->pModel = new Model();
-	result = this->pModel->Init(this->pDirect3D->GetDevice(), this->pDirect3D->GetDeviceContext(), "./data/danger.tga");
+	result = this->pModel->Init(this->pDirect3D->GetDevice(), this->pDirect3D->GetDeviceContext(), "./data/stone01.tga");
 	if (!result) {
 		MessageBox(hWnd, L"Could not initialize the model object.", L"Model Init Error", MB_OK);
 		return false;
