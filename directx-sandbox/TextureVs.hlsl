@@ -21,7 +21,7 @@ PixelInput TextureVertexShader(VertexInput input)
 {
     PixelInput output;
     
-    //input.position.w = 1.0f; // Still don't understand why we do this
+    input.position.w = 1.0f; // Still don't understand why we do this
     
     output.position = mul(input.position, worldMatrix);
     output.position = mul(output.position, viewMatrix);

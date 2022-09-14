@@ -12,9 +12,6 @@ Camera::Camera() {
 	this->rotationZ = 0.0f;
 }
 
-Camera::Camera(const Camera& other) {
-}
-
 Camera::~Camera() {
 }
 

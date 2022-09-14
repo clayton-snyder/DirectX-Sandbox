@@ -82,7 +82,7 @@ bool TextureShader::InitShader(ID3D11Device* pDevice, HWND hWnd, const wchar_t* 
 	printf("Vertex and pixel shaders instantiated from compiled bytes!\n");
 
 	// Create the vertex input layout description
-	// This setup needs to match the VertexType stucture in the Model class and in the shader.
+	// ***->This setup needs to match the Vertex stucture in the Model class and in the shader.
 	polygonLayout[0].SemanticName = "POSITION";
 	polygonLayout[0].SemanticIndex = 0;
 	polygonLayout[0].Format = DXGI_FORMAT_R32G32B32_FLOAT;
@@ -93,7 +93,7 @@ bool TextureShader::InitShader(ID3D11Device* pDevice, HWND hWnd, const wchar_t* 
 
 	polygonLayout[1].SemanticName = "TEXCOORD"; // Notice this matches the semantic in the HLSL files
 	polygonLayout[1].SemanticIndex = 0; // And this is the index placed after the semantic name!
-	polygonLayout[1].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	polygonLayout[1].Format = DXGI_FORMAT_R32G32_FLOAT; //DXGI_FORMAT_R32G32B32A32_FLOAT;
 	polygonLayout[1].InputSlot = 0;
 	polygonLayout[1].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
 	polygonLayout[1].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;

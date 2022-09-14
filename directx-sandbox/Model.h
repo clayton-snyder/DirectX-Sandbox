@@ -10,7 +10,6 @@ class Model {
 private:
 	struct Vertex {
 		DirectX::XMFLOAT3 position; // x,y,z
-		//DirectX::XMFLOAT4 color;    // r,g,b,a
 		DirectX::XMFLOAT2 texture;
 	};
 

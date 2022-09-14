@@ -6,9 +6,6 @@ Texture::Texture() {
 	this->pTextureView = nullptr;	// ?? Mystery
 }
 
-Texture::Texture(const Texture& other) {
-}
-
 Texture::~Texture() {
 }
 
@@ -123,7 +120,8 @@ bool Texture::LoadTarga(const char* filename, int& height, int& width) {
 	readCount = (unsigned int)fread(targaImageRawData, 1, imageSize, pFile);
 	if (readCount != imageSize) {
 		// we expect to have read # of bytes based on width * height * 4
-		printf("ERROR: Read unexpected number of bytes %d. Expected %d.\n", readCount, imageSize);
+		printf("ERROR: Read unexpected number of bytes %d. Expected %d. " \
+			"This could be due to compression.\n", readCount, imageSize);
 		return false;
 	}
 
@@ -137,48 +135,19 @@ bool Texture::LoadTarga(const char* filename, int& height, int& width) {
 	// Now we have to read the raw targa data backwards into our destination data array since targa
 	// format stores the data upside down lmao
 	this->pTargaData = new unsigned char[imageSize];
-
+	int loadIndex = 0;
 	int targaIndex = (height * width * 4) - (width * 4); // start at the end of the raw targa buffer
 	for (int i = 0; i < height; i++) {
-		int rowOffset = i * width;
-		for (int j = 0; j < width * 4; j+=4) {
-			this->pTargaData[j + rowOffset] = targaImageRawData[targaIndex + 2]; // red
-			this->pTargaData[j + rowOffset + 1] = targaImageRawData[targaIndex + 1]; // green
-			this->pTargaData[j + rowOffset + 2] = targaImageRawData[targaIndex + 0]; // blue
-			this->pTargaData[j + rowOffset + 3] = targaImageRawData[targaIndex + 4]; // alpha
+		for (int j = 0; j < width; j++) {
+			this->pTargaData[loadIndex++] = targaImageRawData[targaIndex + 2]; // red
+			this->pTargaData[loadIndex++] = targaImageRawData[targaIndex + 1]; // green
+			this->pTargaData[loadIndex++] = targaImageRawData[targaIndex + 0]; // blue
+			this->pTargaData[loadIndex++] = targaImageRawData[targaIndex + 4]; // alpha
 
 			targaIndex += 4;
 		}
 		targaIndex -= (width * 8);
 	}
-
-	// Allocate memory for the targa destination data.
-	//this->pTargaData = new unsigned char[imageSize];
-
-	//// Initialize the index into the targa destination data array.
-	//int index = 0;
-
-	//// Initialize the index into the targa image data.
-	//int k = (width * height * 4) - (width * 4);
-
-	//// Now copy the targa image data into the targa destination array in the correct order since the targa format is stored upside down.
-	//for (int j = 0; j < height; j++)
-	//{
-	//	for (int i = 0; i < width; i++)
-	//	{
-	//		this->pTargaData[index + 0] = targaImageRawData[k + 2];  // Red.
-	//		this->pTargaData[index + 1] = targaImageRawData[k + 1];  // Green.
-	//		this->pTargaData[index + 2] = targaImageRawData[k + 0];  // Blue
-	//		this->pTargaData[index + 3] = targaImageRawData[k + 3];  // Alpha
-
-	//		// Increment the indexes into the targa data.
-	//		k += 4;
-	//		index += 4;
-	//	}
-
-	//	// Set the targa image data index back to the preceding row at the beginning of the column since its reading it in upside down.
-	//	k -= (width * 8);
-	//}
 
 	delete[] targaImageRawData;
 	targaImageRawData = nullptr;

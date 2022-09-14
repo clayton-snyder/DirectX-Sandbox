@@ -128,7 +128,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
-    <ClCompile Include="ColorShader.cpp" />
     <ClCompile Include="D3DProxy.cpp" />
     <ClCompile Include="Graphics.cpp" />
     <ClCompile Include="main.cpp" />
@@ -140,7 +139,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
-    <ClInclude Include="ColorShader.h" />
     <ClInclude Include="D3DProxy.h" />
     <ClInclude Include="Graphics.h" />
     <ClInclude Include="Input.h" />
@@ -148,12 +146,6 @@
     <ClInclude Include="System.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="TextureShader.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Color_ps.hlsl" />
-    <None Include="Color_vs.hlsl">
-      <DeploymentContent>false</DeploymentContent>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="TexturePs.hlsl">
