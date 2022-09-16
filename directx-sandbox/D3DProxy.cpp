@@ -1,26 +1,18 @@
 #include "D3DProxy.h"
 
 D3DProxy::D3DProxy() {
-	this->pSwapChain = 0;
-	this->pDevice = 0;
-	this->pDeviceContext = 0;
-	this->pRenderTargetView = 0;
-	this->pDepthStencilBuffer = 0;
-	this->pDepthStencilState = 0;
-	this->pDepthStencilView = 0;
-	this->pRasterState = 0;
+	this->pSwapChain = nullptr;
+	this->pDevice = nullptr;
+	this->pDeviceContext = nullptr;
+	this->pRenderTargetView = nullptr;
+	this->pDepthStencilBuffer = nullptr;
+	this->pDepthStencilState = nullptr;
+	this->pDepthStencilView = nullptr;
+	this->pRasterState = nullptr;
 }
 
-
-D3DProxy::D3DProxy(const D3DProxy& other) {
-}
-
-
-D3DProxy::~D3DProxy() {
-}
-
-bool D3DProxy::Init(int screenW, int screenH, bool vsync, HWND hWnd, bool fullscreen,
-	float screenDepth, float screenNear)
+bool D3DProxy::Init(int screenW, int screenH, bool vsync, HWND hWnd, 
+	bool fullscreen, float screenDepth, float screenNear)
 {
 	HRESULT result;
 	IDXGIFactory* factory;
@@ -45,33 +37,26 @@ bool D3DProxy::Init(int screenW, int screenH, bool vsync, HWND hWnd, bool fullsc
 
 	// DGXI = DirectX Graphics Interface
 	result = CreateDXGIFactory(__uuidof(IDXGIFactory), (void**)&factory);
-	if (FAILED(result))
-	{
-		return false;
-	}
+	if (FAILED(result)) return false;
 
-	// Use the factory to create an adapter for the primary graphics interface (video card)
+	// Use factory to create adapter for primary graphics interface (video card)
 	result = factory->EnumAdapters(0, &adapter);
-	if (FAILED(result))
-	{
-		return false;
-	}
+	if (FAILED(result)) return false;
 
 	// Enumerate the primary adapter output (monitor)
 	result = adapter->EnumOutputs(0, &adapterOutput);
+	if (FAILED(result)) return false;
+
+	// Get the number of modes that fit the DXGI_FORMAT_R8G8B8A8_UNORM 
+	// display format for the adapter output (monitor)
+	result = adapterOutput->GetDisplayModeList(DXGI_FORMAT_R8G8B8A8_UNORM, 
+		DXGI_ENUM_MODES_INTERLACED, &numModes, NULL);
 	if (FAILED(result))
 	{
 		return false;
 	}
 
-	// Get the number of modes that fit the DXGI_FORMAT_R8G8B8A8_UNORM display format for the adapter output (monitor)
-	result = adapterOutput->GetDisplayModeList(DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_ENUM_MODES_INTERLACED, &numModes, NULL);
-	if (FAILED(result))
-	{
-		return false;
-	}
-
-	// Create a list to hold all the possible display modes for this monitor/video card combination
+	// List to hold all possible display modes for this monitor + video card
 	displayModeList = new DXGI_MODE_DESC[numModes];
 	if (!displayModeList)
 	{
@@ -79,14 +64,16 @@ bool D3DProxy::Init(int screenW, int screenH, bool vsync, HWND hWnd, bool fullsc
 	}
 
 	// Now fill the display mode list structures
-	result = adapterOutput->GetDisplayModeList(DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_ENUM_MODES_INTERLACED, &numModes, displayModeList);
+	result = adapterOutput->GetDisplayModeList(DXGI_FORMAT_R8G8B8A8_UNORM, 
+		DXGI_ENUM_MODES_INTERLACED, &numModes, displayModeList);
 	if (FAILED(result))
 	{
 		return false;
 	}
 
-	// Now go through all the display modes and find the one that matches the screen width and height
-	// When a match is found store the numerator and denominator of the refresh rate for that monitor
+	// Now go through all the display modes and find the one that matches the 
+	// screen width and height. When a match is found store the numerator and 
+	// denominator of the refresh rate for that monitor
 	for (i = 0; i < numModes; i++)
 	{
 		if (displayModeList[i].Width == (unsigned int)screenW)
@@ -107,14 +94,12 @@ bool D3DProxy::Init(int screenW, int screenH, bool vsync, HWND hWnd, bool fullsc
 	}
 
 	// Store the dedicated video card memory in megabytes
-	this->videoCardMemory = (int)(adapterDesc.DedicatedVideoMemory / 1024 / 1024);
+	this->videoCardMem = (int)(adapterDesc.DedicatedVideoMemory / 1024 / 1024);
 
 	// Convert the name of the video card to a character array and store it.
-	error = wcstombs_s(&stringLength, this->videoCardDescription, 128, adapterDesc.Description, 128);
-	if (error != 0)
-	{
-		return false;
-	}
+	error = wcstombs_s(&stringLength, this->videoCardDescription, 128, 
+						adapterDesc.Description, 128);
+	if (error != 0) return false;
 
 	// Clean up now that we have monitor/video card info
 	delete[] displayModeList;
@@ -126,13 +111,14 @@ bool D3DProxy::Init(int screenW, int screenH, bool vsync, HWND hWnd, bool fullsc
 	factory->Release();
 	factory = nullptr;
 
-	// Swap chain is the front and back buffer to which graphics will be drawn. I.e., draw to 
-	// back buffer, then swap to the front to display to the screen to avoid redrawing
+	// Swap chain is the front and back buffer to which graphics will be drawn. 
+	// I.e., draw to back buffer, then swap to the front to display to the 
+	// screen to avoid redrawing
 	ZeroMemory(&swapChainDesc, sizeof(swapChainDesc));
 	swapChainDesc.BufferCount = 1; // single back buffer
 	swapChainDesc.BufferDesc.Width = screenW;
 	swapChainDesc.BufferDesc.Height = screenH;
-	swapChainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM; // Regular 32-bit surface
+	swapChainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM; 
 
 	// Set the refresh rate of the back buffer.
 	if (this->vsyncEnabled) {
@@ -163,27 +149,22 @@ bool D3DProxy::Init(int screenW, int screenH, bool vsync, HWND hWnd, bool fullsc
 	featureLevel = D3D_FEATURE_LEVEL_11_0;
 	
 	// This can fail if the primary video card is not DirectX 11 compatible.
-	result = D3D11CreateDeviceAndSwapChain(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL, 0, &featureLevel, 1,
-		D3D11_SDK_VERSION, &swapChainDesc, &(this->pSwapChain), &(this->pDevice), NULL, &(this->pDeviceContext));
-	if (FAILED(result))
-	{
-		return false;
-	}
+	result = D3D11CreateDeviceAndSwapChain(NULL, D3D_DRIVER_TYPE_HARDWARE, 
+		NULL, 0, &featureLevel, 1, D3D11_SDK_VERSION, &swapChainDesc, 
+		&(this->pSwapChain), &(this->pDevice), NULL, &(this->pDeviceContext));
+	if (FAILED(result)) return false;
 
-	result = this->pSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&backBufferPtr);
-	if (FAILED(result))
-	{
-		return false;
-	}
+
+	result = this->pSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D),
+											(LPVOID*)&backBufferPtr);
+	if (FAILED(result)) return false;
 
 	// This attaches the back buffer pointer to the swap chain
-	result = this->pDevice->CreateRenderTargetView(backBufferPtr, NULL, &(this->pRenderTargetView));
-	if (FAILED(result))
-	{
-		return false;
-	}
+	result = this->pDevice->CreateRenderTargetView(
+		backBufferPtr, NULL, &(this->pRenderTargetView));
+	if (FAILED(result)) return false;
 
-	// Don't need this anymore now that it's been used to create the RenderTargetView
+	// Don't need anymore now that it's been used to create the RenderTargetView
 	backBufferPtr->Release();
 	backBufferPtr = nullptr;
 
@@ -201,14 +182,14 @@ bool D3DProxy::Init(int screenW, int screenH, bool vsync, HWND hWnd, bool fullsc
 	depthBufferDesc.CPUAccessFlags = 0;
 	depthBufferDesc.MiscFlags = 0;
 
-	// This 2D texture (depth buffer) is where sorted and rasterized polygons are placed to then be drawn
-	result = this->pDevice->CreateTexture2D(&depthBufferDesc, NULL, &(this->pDepthStencilBuffer));
-	if (FAILED(result))
-	{
-		return false;
-	}
+	// This 2D texture (depth buffer) is where sorted and rasterized 
+	// polygons are placed to then be drawn
+	result = this->pDevice->CreateTexture2D(
+		&depthBufferDesc, NULL, &(this->pDepthStencilBuffer));
+	if (FAILED(result)) return false;
 
-	// Depth stencil setup (allows us to control type of depth test Direct3D does for each pixel)
+	// Depth stencil setup (allows us to control type of depth test Direct3D 
+	// does for each pixel)
 	ZeroMemory(&depthStencilDesc, sizeof(depthStencilDesc));
 
 	depthStencilDesc.DepthEnable = true;
@@ -230,32 +211,30 @@ bool D3DProxy::Init(int screenW, int screenH, bool vsync, HWND hWnd, bool fullsc
 	depthStencilDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
 	depthStencilDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
 
-	result = this->pDevice->CreateDepthStencilState(&depthStencilDesc, &(this->pDepthStencilState));
-	if (FAILED(result))
-	{
-		return false;
-	}
+	result = this->pDevice->CreateDepthStencilState(
+		&depthStencilDesc, &(this->pDepthStencilState));
+	if (FAILED(result)) return false;
 
 	this->pDeviceContext->OMSetDepthStencilState(this->pDepthStencilState, 1);
 
-	// Create the view of the depth stencil buffer so Direct3D knows to use the depth buffer as a 
-	// depth stencil texture.
+	// Create the view of the depth stencil buffer so Direct3D knows to use the 
+	// depth buffer as a depth stencil texture.
 	ZeroMemory(&depthStencilViewDesc, sizeof(depthStencilViewDesc));
 	depthStencilViewDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
 	depthStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
 	depthStencilViewDesc.Texture2D.MipSlice = 0;
 	result = this->pDevice->CreateDepthStencilView(
-		this->pDepthStencilBuffer, &depthStencilViewDesc, &(this->pDepthStencilView));
-	if (FAILED(result))
-	{
-		return false;
-	}
+		this->pDepthStencilBuffer, &depthStencilViewDesc, 
+		&(this->pDepthStencilView));
+	if (FAILED(result)) return false;
 
-	// Bind the render target view and depth stencil buffer to the output render pipeline.
-	this->pDeviceContext->OMSetRenderTargets(1, &(this->pRenderTargetView), this->pDepthStencilView);
+	// Bind render target view + depth stencil buffer to output render pipeline.
+	this->pDeviceContext->OMSetRenderTargets(
+		1, &(this->pRenderTargetView), this->pDepthStencilView);
 
-	// Set up custom rasterizer state so we can override control of how polygons are rendered
-	// There is a default rasterizer state but we need this if we want to have any custom control
+	// Set up custom rasterizer state so we can override control of how 
+	// polygons are rendered. There is a default rasterizer state but we 
+	// need this if we want to have any custom control
 	rasterDesc.AntialiasedLineEnable = false;
 	rasterDesc.CullMode = D3D11_CULL_NONE;
 	rasterDesc.DepthBias = 0;
@@ -267,11 +246,9 @@ bool D3DProxy::Init(int screenW, int screenH, bool vsync, HWND hWnd, bool fullsc
 	rasterDesc.ScissorEnable = false;
 	rasterDesc.SlopeScaledDepthBias = 0.0f;
 
-	result = this->pDevice->CreateRasterizerState(&rasterDesc, &(this->pRasterState));
-	if (FAILED(result))
-	{
-		return false;
-	}
+	result = this->pDevice->CreateRasterizerState(
+		&rasterDesc, &(this->pRasterState));
+	if (FAILED(result)) return false;
 
 	this->pDeviceContext->RSSetState(this->pRasterState);
 
@@ -284,25 +261,29 @@ bool D3DProxy::Init(int screenW, int screenH, bool vsync, HWND hWnd, bool fullsc
 	viewport.TopLeftY = 0.0f;
 	this->pDeviceContext->RSSetViewports(1, &viewport);
 
-	// Projection matrix used to translate 3D scene into 2D viewport space. We need to keep a copy
-	// to pass to shaders used to render scenes
+	// Projection matrix used to translate 3D scene into 2D viewport space. 
+	// We need to keep a copy to pass to shaders used to render scenes
 	fieldOfView = 3.141592654f / 4.0f;
 	screenAspect = (float)screenW / (float)screenH;
-	this->pProjectionMatrix = DirectX::XMMatrixPerspectiveFovLH(fieldOfView, screenAspect, screenNear, screenDepth);
+	this->pProjectionMatrix = DirectX::XMMatrixPerspectiveFovLH(
+		fieldOfView, screenAspect, screenNear, screenDepth);
 
-	// World matrix used to convert vertices of objects into vertices in the 3D scene, and to rotate,
-	// translate, and scale objects in 3D space. Also will be passed to shaders for rendering
+	// World matrix used to convert vertices of objects into vertices in the 3D 
+	// scene, and to rotate, translate, and scale objects in 3D space. 
+	// Also will be passed to shaders for rendering
 	this->pWorldMatrix = DirectX::XMMatrixIdentity();
 
-	// Orthographic projection matrix for 2D rendering (e.g., UI/HUD/text skipping 3D rendering)
-	this->pOrthoMatrix = DirectX::XMMatrixOrthographicLH((float)screenW, (float)screenH, screenNear, screenDepth);
+	// Orthographic projection matrix for 2D rendering 
+	// (e.g., UI/HUD/text skipping 3D rendering)
+	this->pOrthoMatrix = DirectX::XMMatrixOrthographicLH(
+		(float)screenW, (float)screenH, screenNear, screenDepth);
 
 	return true;
 }
 
 void D3DProxy::Shutdown()
 {
-	// Set to windowed mode before releasing the swap chain to avoid an exception
+	// Set to windowed mode before releasing swap chain to avoid an exception
 	if (this->pSwapChain)
 	{
 		this->pSwapChain->SetFullscreenState(false, NULL);
@@ -357,7 +338,7 @@ void D3DProxy::Shutdown()
 	}
 }
 
-// Call when drawing a new 3D scene at the beginning of a frame; initializes buffers
+// Call when drawing a new 3D scene at the beginning of a frame; inits buffers
 void D3DProxy::BeginScene(float red, float green, float blue, float alpha) {
 	float color[4];
 
@@ -368,7 +349,8 @@ void D3DProxy::BeginScene(float red, float green, float blue, float alpha) {
 	color[3] = alpha;
 
 	this->pDeviceContext->ClearRenderTargetView(this->pRenderTargetView, color); // back buffer
-	this->pDeviceContext->ClearDepthStencilView(this->pDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0); // depth buffer
+	this->pDeviceContext->ClearDepthStencilView(
+		this->pDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0); // depth buffer
 }
 
 // Display the back buffer once drawing is complete
@@ -409,5 +391,5 @@ void D3DProxy::GetOrthoMatrix(DirectX::XMMATRIX& orthoMatrix) {
 
 void D3DProxy::GetVideoCardInfo(char* cardName, int& memory) {
 	strcpy_s(cardName, 128, this->videoCardDescription);
-	memory = this->videoCardMemory;
+	memory = this->videoCardMem;
 }

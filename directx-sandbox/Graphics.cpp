@@ -87,14 +87,14 @@ void Graphics::Shutdown() {
 bool Graphics::Frame() {
 	static float rotation = 0.0f; // is this the right place to declare this?
 
-	rotation += DirectX::XM_PI * 0.01f;
+	rotation += DirectX::XM_PI * 0.002f;
 	if (rotation > 360.0f) rotation = 0;
 
 	return Render(rotation);
 }
 
 bool Graphics::Render(float rotation) {
-	pDirect3D->BeginScene(1.0f, 1.0f, 0.85f, 1.0f); // plain white screen
+	pDirect3D->BeginScene(1.0f, 1.0f, 0.85f, 1.0f); // background
 
 	// Generate the view matrix based on camera's current position
 	pCamera->Render();

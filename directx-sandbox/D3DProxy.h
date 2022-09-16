@@ -11,8 +11,6 @@ class D3DProxy
 {
 public:
 	D3DProxy();
-	D3DProxy(const D3DProxy&);
-	~D3DProxy();
 
 	bool Init(int, int, bool, HWND, bool, float, float);
 	void Shutdown();
@@ -31,7 +29,7 @@ public:
 
 private:
 	bool vsyncEnabled;
-	int videoCardMemory;
+	int videoCardMem;
 	char videoCardDescription[128];
 	IDXGISwapChain* pSwapChain;
 	ID3D11Device* pDevice;

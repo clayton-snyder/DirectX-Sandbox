@@ -44,7 +44,7 @@ ID3D11ShaderResourceView* Model::GetTexture() {
 // data file and create the buffers from that, but for now we are just making one triangle.
 bool Model::InitBuffers(ID3D11Device* device) {
 	this->vertexCount = 4;
-	this->indexCount = 6;
+	this->indexCount = 12;
 	Vertex* vertices = new Vertex[this->vertexCount];
 	unsigned long* indices = new unsigned long[this->indexCount];
 
@@ -71,13 +71,22 @@ bool Model::InitBuffers(ID3D11Device* device) {
 	vertices[3].normal = DirectX::XMFLOAT3(0.0f, 0.0f, -1.0f);
 
 
-	// Load the index array with data.
+	// Front face
 	indices[0] = 0;  // t1 bot left
 	indices[1] = 1;  // t1 top left
 	indices[2] = 3;  // t1 bot right
 	indices[3] = 3;  // t2 bot right
 	indices[4] = 1;  // t2 top left
 	indices[5] = 2;  // t2 top right
+
+	// Back face
+	indices[6] = 2;  // t2 top right
+	indices[7] = 1;  // t2 top left
+	indices[8] = 3;  // t2 bot right
+	indices[9] = 3;  // t1 bot right
+	indices[10] = 1;  // t1 top left
+	indices[11] = 0;  // t1 bot left
+
 
 
 	D3D11_BUFFER_DESC vertexBufferDesc;
