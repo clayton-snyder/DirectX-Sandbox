@@ -33,21 +33,23 @@ bool Graphics::Init(int screenW, int screenH, HWND hWnd) {
 	this->pCamera->SetRotation(0.0f, 0.0f, 0.0f);
 
 	this->pModel = new Model();
-	result = this->pModel->Init(this->pDirect3D->GetDevice(), this->pDirect3D->GetDeviceContext(), "./data/stone01.tga");
+	result = this->pModel->Init(pDirect3D->GetDevice(), pDirect3D->GetDeviceContext(), 
+		"./data/stone01.tga", "./data/model.txt");
 	if (!result) {
-		MessageBox(hWnd, L"Could not initialize the model object.", L"Model Init Error", MB_OK);
+		MessageBox(hWnd, L"Could not initialize model object.", L"Model Init Error", MB_OK);
 		return false;
 	}
 
 	this->pLightShader = new LightShader();
 	result = pLightShader->Init(pDirect3D->GetDevice(), hWnd);
 	if (!result) {
-		MessageBox(hWnd, L"Could not initialize the TextureShader object.", L"TextureShader Init Error", MB_OK);
+		MessageBox(hWnd, L"Could not initialize TextureShader object.", 
+			L"TextureShader Init Error", MB_OK);
 		return false;
 	}
 
 	this->pLight = new Light();
-	pLight->SetDiffuseColor(1.0f, 0.0f, 1.0f, 1.0f);
+	pLight->SetDiffuseColor(1.0f, 1.0f, 1.0f, 1.0f);
 	pLight->SetDirection(0.0f, 0.0f, 1.0f);
 
 	return true;
@@ -94,7 +96,8 @@ bool Graphics::Frame() {
 }
 
 bool Graphics::Render(float rotation) {
-	pDirect3D->BeginScene(1.0f, 1.0f, 0.85f, 1.0f); // background
+	//pDirect3D->BeginScene(1.0f, 1.0f, 0.85f, 1.0f); // background
+	pDirect3D->BeginScene(0.07f, 0.0f, 0.34f, 1.0f);
 
 	// Generate the view matrix based on camera's current position
 	pCamera->Render();
@@ -109,7 +112,8 @@ bool Graphics::Render(float rotation) {
 
 	bool result = this->pLightShader->Render(
 		pDirect3D->GetDeviceContext(), pModel->GetIndexCount(), pModel->GetTexture(),
-		worldMatrix * DirectX::XMMatrixRotationY(rotation), viewMatrix, projectionMatrix,
+		worldMatrix * DirectX::XMMatrixRotationY(rotation)
+			* DirectX::XMMatrixRotationX(rotation), viewMatrix, projectionMatrix,
 		pLight->GetDirection(), pLight->GetDiffuseColor()
 	);
 	if (!result) return false;
