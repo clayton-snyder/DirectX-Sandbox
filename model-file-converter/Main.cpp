@@ -20,9 +20,9 @@ struct DXVertexInput {
 		const std::vector<float>& tex,
 		const std::vector<float>& norm)
 	{
-		posX = pos.at(0); posY = pos.at(1); posZ = pos.at(2) * -1.0f;
-		texU = tex.at(0); texV = 1.0f - tex.at(1);
-		normX = norm.at(0); normY = norm.at(1); normZ = norm.at(2) * -1.0f;
+		posX = pos.at(0); posY = pos.at(1); posZ = pos.at(2);
+		texU = tex.at(0); texV = 1.0 - tex.at(1);
+		normX = norm.at(0); normY = norm.at(1); normZ = norm.at(2);
 	}
 };
 
@@ -145,7 +145,7 @@ std::vector<DXVertexInput> materializeFaces(
 
 	for (int i = 0; i < faces.size(); i++) {
 		std::vector<std::string> face = faces.at(i);
-		for (int j = 2; j >= 0; j--) {
+		for (int j = 0; j < 3; j++) {
 			std::string faceVertex = face.at(j);
 			int off1 = faceVertex.find("/");
 			int off2 = faceVertex.find("/", off1 + 1);
@@ -170,34 +170,35 @@ std::vector<DXVertexInput> materializeFaces(
 
 int main(int argc, char* argv[]) {
 	printf("Model converter started.  argc=%d\n", argc);
-	if (argc < 2) {
-		printf("ERROR: missing filename parameter\n");
+	if (argc < 3) {
+		printf("ERROR: missing input or output filename parameter\n");
 		return -5;
 	}
 
 	std::string inputModelFilename = argv[1];
+	std::string outputModelFilename = argv[2];
 	printf("Attempting to convert model file: %s\n", inputModelFilename.c_str());
 
 	std::vector<std::string> vLines, vtLines, vnLines, fLines;
 	int lineCount = loadLineVectors(inputModelFilename, vLines, vtLines, vnLines, fLines);
 	printf("Extracted %d relevant lines from model file.\n", lineCount);
 
-	printf("Vertices:\n");
-	for (int i = 0; i < vLines.size(); i++) {
-		std::cout << vLines[i] << std::endl;
-	}
-	printf("Texels:\n");
-	for (int i = 0; i < vtLines.size(); i++) {
-		std::cout << vtLines[i] << std::endl;
-	}
-	printf("Normals:\n");
-	for (int i = 0; i < vnLines.size(); i++) {
-		std::cout << vnLines[i] << std::endl;
-	}
-	printf("Faces:\n");
-	for (int i = 0; i < fLines.size(); i++) {
-		std::cout << fLines[i] << std::endl;
-	}
+	//printf("Vertices:\n");
+	//for (int i = 0; i < vLines.size(); i++) {
+	//	std::cout << vLines[i] << std::endl;
+	//}
+	//printf("Texels:\n");
+	//for (int i = 0; i < vtLines.size(); i++) {
+	//	std::cout << vtLines[i] << std::endl;
+	//}
+	//printf("Normals:\n");
+	//for (int i = 0; i < vnLines.size(); i++) {
+	//	std::cout << vnLines[i] << std::endl;
+	//}
+	//printf("Faces:\n");
+	//for (int i = 0; i < fLines.size(); i++) {
+	//	std::cout << fLines[i] << std::endl;
+	//}
 
 	std::vector<std::vector<float>> v(vLines.size());
 	std::vector<std::vector<float>> vt(vtLines.size());
@@ -208,70 +209,74 @@ int main(int argc, char* argv[]) {
 		printf("ERROR: parseInputLines failed, aborting.\n");
 		return -10;
 	}
-	printf("Loaded vertices vector:\n");
-	for (int i = 0; i < v.size(); i++) {
-		std::vector<float> vertex = v.at(i);
-		for (int j = 0; j < vertex.size(); j++) {
-			std::cout << vertex.at(j) << " ";
-		}
-		std::cout << std::endl;
-	}
+	//printf("Loaded vertices vector:\n");
+	//for (int i = 0; i < v.size(); i++) {
+	//	std::vector<float> vertex = v.at(i);
+	//	for (int j = 0; j < vertex.size(); j++) {
+	//		std::cout << vertex.at(j) << " ";
+	//	}
+	//	std::cout << std::endl;
+	//}
 
 	if (parseInputLines(vtLines, vt, 2) < 0) {
 		printf("ERROR: parseInputLines failed, aborting.\n");
 		return -10;
 	}
-	printf("Loaded texels vector:\n");
-	for (int i = 0; i < vt.size(); i++) {
-		std::vector<float> texel = vt.at(i);
-		for (int j = 0; j < texel.size(); j++) {
-			std::cout << texel.at(j) << " ";
-		}
-		std::cout << std::endl;
-	}
+	//printf("Loaded texels vector:\n");
+	//for (int i = 0; i < vt.size(); i++) {
+	//	std::vector<float> texel = vt.at(i);
+	//	for (int j = 0; j < texel.size(); j++) {
+	//		std::cout << texel.at(j) << " ";
+	//	}
+	//	std::cout << std::endl;
+	//}
 
 	if (parseInputLines(vnLines, vn, 3) < 0) {
 		printf("ERROR: parseInputLines failed, aborting.\n");
 		return -10;
 	}
-	printf("Loaded normals vector:\n");
-	for (int i = 0; i < vn.size(); i++) {
-		std::vector<float> normal = vn.at(i);
-		for (int j = 0; j < normal.size(); j++) {
-			std::cout << normal.at(j) << " ";
-		}
-		std::cout << std::endl;
-	}
+	//printf("Loaded normals vector:\n");
+	//for (int i = 0; i < vn.size(); i++) {
+	//	std::vector<float> normal = vn.at(i);
+	//	for (int j = 0; j < normal.size(); j++) {
+	//		std::cout << normal.at(j) << " ";
+	//	}
+	//	std::cout << std::endl;
+	//}
 
 	if (parseFaceInputLines(fLines, f, 3) < 0) {
 		printf("ERROR:parseFaceInputLines failed, aborting.\n");
 		return -15;
 	}
-	printf("Loaded faces vector:\n");
-	for (int i = 0; i < f.size(); i++) {
-		std::vector<std::string> face = f.at(i);
-		for (int j = 0; j < face.size(); j++) {
-			std::cout << face.at(j) << " ";
-		}
-		std::cout << std::endl;
-	}
+	//printf("Loaded faces vector:\n");
+	//for (int i = 0; i < f.size(); i++) {
+	//	std::vector<std::string> face = f.at(i);
+	//	for (int j = 0; j < face.size(); j++) {
+	//		std::cout << face.at(j) << " ";
+	//	}
+	//	std::cout << std::endl;
+	//}
 
 	std::vector<DXVertexInput> dxInputs = materializeFaces(v, vt, vn, f);
 	printf("Materialized!\n");
-	for (int i = 0; i < dxInputs.size(); i++) {
-		DXVertexInput dxi = dxInputs.at(i);
-		printf("%.3f, %.3f, %.3f, %.3f, %.3f, %.3f, %.3f, %.3f\n",
-			dxi.posX, dxi.posY, dxi.posZ, dxi.texU, dxi.texV, dxi.normX, dxi.normY, dxi.normZ);
-	}
+	//for (int i = 0; i < dxInputs.size(); i++) {
+	//	DXVertexInput dxi = dxInputs.at(i);
+	//	printf("%.3f, %.3f, %.3f, %.3f, %.3f, %.3f, %.3f, %.3f\n",
+	//		dxi.posX, dxi.posY, dxi.posZ, dxi.texU, dxi.texV, dxi.normX, dxi.normY, dxi.normZ);
+	//}
 
-	std::ofstream outfile("thena_model2.txt");
+	std::ofstream outfile(outputModelFilename);
+	char strBuf[100];
+	sprintf(strBuf, "%d\n", (int)dxInputs.size());
+	outfile << strBuf;
 	for (int i = 0; i < dxInputs.size(); i++) {
 		DXVertexInput dxi = dxInputs.at(i);
-		char str[100];
-		sprintf(str, "%f %f %f %f %f %f %f %f\n",
+		sprintf(strBuf, "%f %f %f %f %f %f %f %f\n",
 			dxi.posX, dxi.posY, dxi.posZ, dxi.texU, dxi.texV, dxi.normX, dxi.normY, dxi.normZ);
-		outfile << str;
+		outfile << strBuf;
 	}
 	outfile.close();
+
+	printf("Output written to: %s\n", outputModelFilename.c_str());
 	return 0;
 }

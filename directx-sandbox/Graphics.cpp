@@ -29,12 +29,12 @@ bool Graphics::Init(int screenW, int screenH, HWND hWnd) {
 	}
 
 	this->pCamera = new Camera();
-	this->pCamera->SetPosition(0.0f, 200.0f, -750.0f);
+	this->pCamera->SetPosition(0.0f, 00.0f, -15.0f);
 	this->pCamera->SetRotation(0.0f, 0.0f, 0.0f);
 
 	this->pModel = new Model();
-	result = this->pModel->Init(pDirect3D->GetDevice(), pDirect3D->GetDeviceContext(), 
-		"./data/thena_tex2.tga", "./data/thena_model2.txt");
+	result = this->pModel->Init(pDirect3D->GetDevice(), pDirect3D->GetDeviceContext(),
+		"./data/stone01.tga", "./data/sq_cubes.txt");
 	if (!result) {
 		MessageBox(hWnd, L"Could not initialize model object.", L"Model Init Error", MB_OK);
 		return false;
@@ -112,7 +112,8 @@ bool Graphics::Render(float rotation) {
 
 	bool result = this->pLightShader->Render(
 		pDirect3D->GetDeviceContext(), pModel->GetIndexCount(), pModel->GetTexture(),
-		worldMatrix * DirectX::XMMatrixRotationY(rotation), viewMatrix, projectionMatrix,
+		worldMatrix * DirectX::XMMatrixRotationY(rotation)
+		* DirectX::XMMatrixRotationZ(rotation), viewMatrix, projectionMatrix,
 		pLight->GetDirection(), pLight->GetDiffuseColor()
 	);
 	if (!result) return false;
