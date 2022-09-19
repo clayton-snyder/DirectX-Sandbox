@@ -50,6 +50,7 @@ bool Graphics::Init(int screenW, int screenH, HWND hWnd) {
 
 	this->pLight = new Light();
 	pLight->SetDiffuseColor(1.0f, 1.0f, 1.0f, 1.0f);
+	pLight->SetAmbientColor(0.15f, 0.15f, 0.15f, 1.0f);
 	pLight->SetDirection(0.0f, 0.0f, 1.0f);
 
 	return true;
@@ -112,9 +113,8 @@ bool Graphics::Render(float rotation) {
 
 	bool result = this->pLightShader->Render(
 		pDirect3D->GetDeviceContext(), pModel->GetIndexCount(), pModel->GetTexture(),
-		worldMatrix * DirectX::XMMatrixRotationY(rotation)
-		* DirectX::XMMatrixRotationZ(rotation), viewMatrix, projectionMatrix,
-		pLight->GetDirection(), pLight->GetDiffuseColor()
+		worldMatrix * DirectX::XMMatrixRotationY(rotation), viewMatrix, projectionMatrix,
+		pLight->GetDirection(), pLight->GetDiffuseColor(), pLight->GetAmbientColor()
 	);
 	if (!result) return false;
 

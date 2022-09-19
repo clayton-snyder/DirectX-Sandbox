@@ -19,12 +19,12 @@ void LightShader::Shutdown() {
 
 bool LightShader::Render(ID3D11DeviceContext* dCtx, int idxCt, ID3D11ShaderResourceView* pTex,
 	DirectX::XMMATRIX worldMx, DirectX::XMMATRIX viewMx, DirectX::XMMATRIX projMx,
-	DirectX::XMFLOAT3 lightDir, DirectX::XMFLOAT4 diffuseClr)
+	DirectX::XMFLOAT3 lightDir, DirectX::XMFLOAT4 diffuseClr, DirectX::XMFLOAT4 ambientClr)
 {
 	// Setting the shader paramteres externally like we talked about in Color.vs
 	bool result = this->SetShaderParams(dCtx, pTex, 
 										worldMx, viewMx, projMx, 
-										lightDir, diffuseClr);
+										lightDir, diffuseClr, ambientClr);
 
 	// Now render the prepared buffers with the shader
 	if (result) RenderShader(dCtx, idxCt);
@@ -226,7 +226,7 @@ void LightShader::OutputShaderErrorMessage(
 // VertexShader (after transposing them!) during the Render call. Also pass the texture data.
 bool LightShader::SetShaderParams(ID3D11DeviceContext* pDvCtx, ID3D11ShaderResourceView* pTex,
 	DirectX::XMMATRIX worldMx, DirectX::XMMATRIX viewMx, DirectX::XMMATRIX projMx,
-	DirectX::XMFLOAT3 lightDir, DirectX::XMFLOAT4 diffuseColor)
+	DirectX::XMFLOAT3 lightDir, DirectX::XMFLOAT4 diffuseClr, DirectX::XMFLOAT4 ambientClr)
 {
 	unsigned int bufferNumber;
 
@@ -256,7 +256,8 @@ bool LightShader::SetShaderParams(ID3D11DeviceContext* pDvCtx, ID3D11ShaderResou
 	}
 	LightBuffer* pLightBufData = (LightBuffer*)mappedResource.pData;
 	pLightBufData->direction = lightDir;
-	pLightBufData->diffuseColor = diffuseColor;
+	pLightBufData->diffuseColor = diffuseClr;
+	pLightBufData->ambientColor = ambientClr;
 	pLightBufData->padding = 0.0f;
 	pDvCtx->Unmap(pLightBuf, 0);
 	pDvCtx->PSSetConstantBuffers(0, 1, &pLightBuf); // update the pixel shader

@@ -17,6 +17,7 @@ private:
 	};
 
 	struct LightBuffer {
+		DirectX::XMFLOAT4 ambientColor;
 		DirectX::XMFLOAT4 diffuseColor;
 		DirectX::XMFLOAT3 direction;
 		float padding; // just to add four bytes for 16-byte memory alignment
@@ -27,7 +28,7 @@ private:
 	void OutputShaderErrorMessage(ID3D10Blob*, HWND, const wchar_t*);
 	bool SetShaderParams(ID3D11DeviceContext*, ID3D11ShaderResourceView*, 
 						DirectX::XMMATRIX, DirectX::XMMATRIX, DirectX::XMMATRIX,
-						DirectX::XMFLOAT3, DirectX::XMFLOAT4);
+						DirectX::XMFLOAT3, DirectX::XMFLOAT4, DirectX::XMFLOAT4);
 	void RenderShader(ID3D11DeviceContext*, int);
 
 	ID3D11VertexShader* pVertexShader;
@@ -44,5 +45,5 @@ public:
 	void Shutdown();
 	bool Render(ID3D11DeviceContext*, int, ID3D11ShaderResourceView*,
 				DirectX::XMMATRIX, DirectX::XMMATRIX, DirectX::XMMATRIX,
-				DirectX::XMFLOAT3, DirectX::XMFLOAT4);
+				DirectX::XMFLOAT3, DirectX::XMFLOAT4, DirectX::XMFLOAT4);
 };
