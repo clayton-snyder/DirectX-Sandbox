@@ -16,11 +16,18 @@ private:
 		DirectX::XMMATRIX projection;
 	};
 
+	// Important that specularPower comes before specularColor to maintain 16-byte alignment
 	struct LightBuffer {
 		DirectX::XMFLOAT4 ambientColor;
 		DirectX::XMFLOAT4 diffuseColor;
 		DirectX::XMFLOAT3 direction;
-		float padding; // just to add four bytes for 16-byte memory alignment
+		float specularExp;
+		DirectX::XMFLOAT4 specularColor;
+	};
+
+	struct CameraBuffer {
+		DirectX::XMFLOAT3 cameraPos;
+		float padding;
 	};
 
 	bool InitShader(ID3D11Device*, HWND, const wchar_t*, const wchar_t*);
@@ -28,7 +35,8 @@ private:
 	void OutputShaderErrorMessage(ID3D10Blob*, HWND, const wchar_t*);
 	bool SetShaderParams(ID3D11DeviceContext*, ID3D11ShaderResourceView*, 
 						DirectX::XMMATRIX, DirectX::XMMATRIX, DirectX::XMMATRIX,
-						DirectX::XMFLOAT3, DirectX::XMFLOAT4, DirectX::XMFLOAT4);
+						DirectX::XMFLOAT3, DirectX::XMFLOAT3,
+						DirectX::XMFLOAT4, DirectX::XMFLOAT4, DirectX::XMFLOAT4, float);
 	void RenderShader(ID3D11DeviceContext*, int);
 
 	ID3D11VertexShader* pVertexShader;
@@ -36,6 +44,7 @@ private:
 	ID3D11InputLayout* pLayout;
 	ID3D11Buffer* pMxBuf;
 	ID3D11Buffer* pLightBuf;
+	ID3D11Buffer* pCameraBuf;
 	ID3D11SamplerState* pSamplerState;
 
 public:
@@ -45,5 +54,6 @@ public:
 	void Shutdown();
 	bool Render(ID3D11DeviceContext*, int, ID3D11ShaderResourceView*,
 				DirectX::XMMATRIX, DirectX::XMMATRIX, DirectX::XMMATRIX,
-				DirectX::XMFLOAT3, DirectX::XMFLOAT4, DirectX::XMFLOAT4);
+				DirectX::XMFLOAT3, DirectX::XMFLOAT4, DirectX::XMFLOAT4,
+				DirectX::XMFLOAT4, float, DirectX::XMFLOAT3);
 };

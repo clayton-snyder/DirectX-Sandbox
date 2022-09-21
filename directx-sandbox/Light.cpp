@@ -18,6 +18,14 @@ DirectX::XMFLOAT4 Light::GetAmbientColor() {
 	return this->ambientColor;
 }
 
+DirectX::XMFLOAT4 Light::GetSpecularColor() {
+	return this->specularColor;
+}
+
+float Light::GetSpecularExp() {
+	return this->specularExp;
+}
+
 void Light::SetDirection(float x, float y, float z) {
 	this->direction = DirectX::XMFLOAT3(x, y, z);
 }
@@ -28,4 +36,12 @@ void Light::SetDiffuseColor(float r, float g, float b, float a) {
 
 void Light::SetAmbientColor(float r, float g, float b, float a) {
 	this->ambientColor = DirectX::XMFLOAT4(r, g, b, a);
+}
+
+void Light::SetSpecularColor(float r, float g, float b, float a) {
+	this->specularColor = DirectX::XMFLOAT4(r, g, b, a);
+}
+
+void Light::SetSpecularExp(float specularExp) {
+	this->specularExp = specularExp;
 }

@@ -6,6 +6,7 @@ LightShader::LightShader() {
 	this->pLayout = nullptr;
 	this->pMxBuf = nullptr;
 	this->pLightBuf = nullptr;
+	this->pCameraBuf = nullptr;
 	this->pSamplerState = nullptr;
 }
 
@@ -19,12 +20,15 @@ void LightShader::Shutdown() {
 
 bool LightShader::Render(ID3D11DeviceContext* dCtx, int idxCt, ID3D11ShaderResourceView* pTex,
 	DirectX::XMMATRIX worldMx, DirectX::XMMATRIX viewMx, DirectX::XMMATRIX projMx,
-	DirectX::XMFLOAT3 lightDir, DirectX::XMFLOAT4 diffuseClr, DirectX::XMFLOAT4 ambientClr)
+	DirectX::XMFLOAT3 lightDir, DirectX::XMFLOAT4 diffuseClr, DirectX::XMFLOAT4 ambientClr,
+	DirectX::XMFLOAT4 specClr, float specExp, DirectX::XMFLOAT3 cameraPos)
 {
 	// Setting the shader paramteres externally like we talked about in Color.vs
 	bool result = this->SetShaderParams(dCtx, pTex, 
 										worldMx, viewMx, projMx, 
-										lightDir, diffuseClr, ambientClr);
+										cameraPos, lightDir, 
+										diffuseClr, ambientClr,
+										specClr, specExp);
 
 	// Now render the prepared buffers with the shader
 	if (result) RenderShader(dCtx, idxCt);
@@ -166,6 +170,19 @@ bool LightShader::InitShader(ID3D11Device* pDevice, HWND hWnd,
 	lightBufDesc.StructureByteStride = 0;
 
 	result = pDevice->CreateBuffer(&lightBufDesc, nullptr, &this->pLightBuf);
+	if (FAILED(result)) return false;
+
+
+	D3D11_BUFFER_DESC cameraBufferDesc;
+	cameraBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	cameraBufferDesc.ByteWidth = sizeof(CameraBuffer);
+	cameraBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	cameraBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	cameraBufferDesc.MiscFlags = 0;
+	cameraBufferDesc.StructureByteStride = 0;
+
+	// Create the camera constant buffer pointer so we can access the vertex shader constant buffer from within this class.
+	result = pDevice->CreateBuffer(&cameraBufferDesc, NULL, &this->pCameraBuf);
 	return !FAILED(result);
 }
 
@@ -178,6 +195,11 @@ void LightShader::ShutdownShader() {
 	if (this->pLightBuf) {
 		this->pLightBuf->Release();
 		this->pLightBuf = nullptr;
+	}
+
+	if (this->pCameraBuf) {
+		this->pCameraBuf->Release();
+		this->pCameraBuf = nullptr;
 	}
 
 	if (this->pLayout) {
@@ -226,7 +248,9 @@ void LightShader::OutputShaderErrorMessage(
 // VertexShader (after transposing them!) during the Render call. Also pass the texture data.
 bool LightShader::SetShaderParams(ID3D11DeviceContext* pDvCtx, ID3D11ShaderResourceView* pTex,
 	DirectX::XMMATRIX worldMx, DirectX::XMMATRIX viewMx, DirectX::XMMATRIX projMx,
-	DirectX::XMFLOAT3 lightDir, DirectX::XMFLOAT4 diffuseClr, DirectX::XMFLOAT4 ambientClr)
+	DirectX::XMFLOAT3 cameraPos, DirectX::XMFLOAT3 lightDir, 
+	DirectX::XMFLOAT4 diffuseClr, DirectX::XMFLOAT4 ambientClr, 
+	DirectX::XMFLOAT4 specClr, float specExp)
 {
 	unsigned int bufferNumber;
 
@@ -235,13 +259,15 @@ bool LightShader::SetShaderParams(ID3D11DeviceContext* pDvCtx, ID3D11ShaderResou
 	viewMx = DirectX::XMMatrixTranspose(viewMx);
 	projMx = DirectX::XMMatrixTranspose(projMx);
 
+
+
+	//// MATRIX BUFFER update (vertex shader)
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
 	HRESULT result = pDvCtx->Map(pMxBuf, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	if (FAILED(result)) {
 		printf("ERROR: Locking matrix cbuffer failed.\n");
 		return false;
 	}
-	// This is a pointer to the actual matrix data in the constant buffer
 	MatrixBuffer* pMxBufData = (MatrixBuffer*)mappedResource.pData;
 	pMxBufData->world = worldMx;
 	pMxBufData->view = viewMx;
@@ -249,6 +275,21 @@ bool LightShader::SetShaderParams(ID3D11DeviceContext* pDvCtx, ID3D11ShaderResou
 	pDvCtx->Unmap(pMxBuf, 0);
 	pDvCtx->VSSetConstantBuffers(0, 1, &pMxBuf); // update the vertex shader
 
+
+	//// CAMERA BUFFER update (vertex shader)
+	result = pDvCtx->Map(pCameraBuf, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	if (FAILED(result)) {
+		printf("ERROR: Locking camera cbuffer failed.\n");
+		return false;
+	}
+	CameraBuffer* pCamBufData = (CameraBuffer*)mappedResource.pData;
+	pCamBufData->cameraPos = cameraPos;
+	//pCamBufData->padding = 0.0f;
+	pDvCtx->Unmap(pCameraBuf, 0);
+	pDvCtx->VSSetConstantBuffers(1, 1, &pCameraBuf);
+
+
+	//// LIGHT BUFFER update (pixel shader)
 	result = pDvCtx->Map(pLightBuf, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	if (FAILED(result)) {
 		printf("ERROR: Locking light cbuffer failed.\n");
@@ -258,7 +299,8 @@ bool LightShader::SetShaderParams(ID3D11DeviceContext* pDvCtx, ID3D11ShaderResou
 	pLightBufData->direction = lightDir;
 	pLightBufData->diffuseColor = diffuseClr;
 	pLightBufData->ambientColor = ambientClr;
-	pLightBufData->padding = 0.0f;
+	pLightBufData->specularColor = specClr;
+	pLightBufData->specularExp = specExp;
 	pDvCtx->Unmap(pLightBuf, 0);
 	pDvCtx->PSSetConstantBuffers(0, 1, &pLightBuf); // update the pixel shader
 

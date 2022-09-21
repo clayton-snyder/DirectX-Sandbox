@@ -10,18 +10,14 @@ Graphics::Graphics() {
 	this->pLight = nullptr;
 }
 
-Graphics::Graphics(const Graphics& other) {
-}
-
-Graphics::~Graphics() {
-}
 
 bool Graphics::Init(int screenW, int screenH, HWND hWnd) {
 	// Create the Direct3D object.
 	this->pDirect3D = new D3DProxy();
 
 	// Initialize the Direct3D object.
-	bool result = this->pDirect3D->Init(screenW, screenH, VSYNC_ENABLED, hWnd, FULL_SCREEN, SCREEN_DEPTH, SCREEN_NEAR);
+	bool result = this->pDirect3D->Init(screenW, screenH, VSYNC_ENABLED, hWnd, 
+		FULL_SCREEN, SCREEN_DEPTH, SCREEN_NEAR);
 	if (!result)
 	{
 		MessageBox(hWnd, L"Could not initialize Direct3D", L"D3D Init Error", MB_OK);
@@ -29,12 +25,14 @@ bool Graphics::Init(int screenW, int screenH, HWND hWnd) {
 	}
 
 	this->pCamera = new Camera();
-	this->pCamera->SetPosition(0.0f, 00.0f, -15.0f);
+	this->pCamera->SetPosition(0.0f, 0.0f, -25.0f);
 	this->pCamera->SetRotation(0.0f, 0.0f, 0.0f);
 
 	this->pModel = new Model();
 	result = this->pModel->Init(pDirect3D->GetDevice(), pDirect3D->GetDeviceContext(),
-		"./data/stone01.tga", "./data/sq_cubes.txt");
+		//"./data/stone01.tga", "./data/sq_cubes.txt");
+		"./data/aluminum.tga", "./data/sq_cubes.txt");
+		//"./data/danger.tga", "./data/sphere.txt");
 	if (!result) {
 		MessageBox(hWnd, L"Could not initialize model object.", L"Model Init Error", MB_OK);
 		return false;
@@ -49,8 +47,11 @@ bool Graphics::Init(int screenW, int screenH, HWND hWnd) {
 	}
 
 	this->pLight = new Light();
-	pLight->SetDiffuseColor(1.0f, 1.0f, 1.0f, 1.0f);
+	pLight->SetDiffuseColor(0.7f, 0.7f, 0.7f, 1.0f);
 	pLight->SetAmbientColor(0.15f, 0.15f, 0.15f, 1.0f);
+	pLight->SetSpecularColor(0.8f, 0.8f, 0.8f, 1.0f);
+	pLight->SetSpecularExp(50.0f);
+	//pLight->SetDirection(1.0f, -1.0f, 1.0f);
 	pLight->SetDirection(0.0f, 0.0f, 1.0f);
 
 	return true;
@@ -113,8 +114,10 @@ bool Graphics::Render(float rotation) {
 
 	bool result = this->pLightShader->Render(
 		pDirect3D->GetDeviceContext(), pModel->GetIndexCount(), pModel->GetTexture(),
-		worldMatrix * DirectX::XMMatrixRotationY(rotation), viewMatrix, projectionMatrix,
-		pLight->GetDirection(), pLight->GetDiffuseColor(), pLight->GetAmbientColor()
+		worldMatrix * DirectX::XMMatrixRotationY(rotation)
+		* DirectX::XMMatrixRotationX(rotation), viewMatrix, projectionMatrix,
+		pLight->GetDirection(), pLight->GetDiffuseColor(), pLight->GetAmbientColor(),
+		pLight->GetSpecularColor(), pLight->GetSpecularExp(), pCamera->GetPosition()
 	);
 	if (!result) return false;
 

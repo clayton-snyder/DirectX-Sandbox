@@ -3,8 +3,6 @@
 #include "D3DProxy.h"
 #include "Model.h"
 #include "Camera.h"
-//#include "ColorShader.h"
-//#include "TextureShader.h"
 #include "LightShader.h"
 #include "Light.h"
 
@@ -16,8 +14,6 @@ const float SCREEN_NEAR = 0.1f;
 class Graphics {
 public:
 	Graphics();
-	Graphics(const Graphics&);
-	~Graphics();
 
 	bool Init(int, int, HWND);
 	void Shutdown();
